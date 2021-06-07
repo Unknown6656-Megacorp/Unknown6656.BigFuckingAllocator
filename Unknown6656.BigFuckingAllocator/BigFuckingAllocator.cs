@@ -121,6 +121,12 @@ namespace Unknown6656.BigFuckingAllocator
         private readonly T*[] _slices;
 
 
+        /// <summary>
+        /// Returns an empty allocator.
+        /// </summary>
+        public static BigFuckingAllocator<T> Empty { get; } = new(0);
+
+
         public bool IsDisposed { get; private set; }
 
         public int ElementSize => sizeof(T);
@@ -168,6 +174,8 @@ namespace Unknown6656.BigFuckingAllocator
 
         /// <summary>
         /// Creates a new (non-destructive) allocator for the given collection.
+        /// <br/>
+        /// All items will be copied from the collection into the newly created allocator.
         /// </summary>
         /// <param name="collection">Collection of items.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,24 +184,48 @@ namespace Unknown6656.BigFuckingAllocator
         {
         }
 
+        /// <summary>
+        /// Creates a new (non-destructive) allocator for the given memory span.
+        /// <br/>
+        /// All items will be copied from the span into the newly created allocator.
+        /// </summary>
+        /// <param name="collection">Memory span.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BigFuckingAllocator(Span<T> memory)
             : this(memory.ToArray())
         {
         }
 
+        /// <summary>
+        /// Creates a new (non-destructive) allocator for the given memory region.
+        /// <br/>
+        /// All items will be copied from the memory into the newly created allocator.
+        /// </summary>
+        /// <param name="collection">Memory region.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BigFuckingAllocator(Memory<T> memory)
             : this(memory.ToArray())
         {
         }
 
+        /// <summary>
+        /// Creates a new (non-destructive) allocator for the given read-only memory span.
+        /// <br/>
+        /// All items will be copied from the span into the newly created allocator.
+        /// </summary>
+        /// <param name="collection">Read-only memory span.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BigFuckingAllocator(ReadOnlySpan<T> memory)
             : this(memory.ToArray())
         {
         }
 
+        /// <summary>
+        /// Creates a new (non-destructive) allocator for the given read-only memory region.
+        /// <br/>
+        /// All items will be copied from the memory into the newly created allocator.
+        /// </summary>
+        /// <param name="collection">Read-only memory region.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BigFuckingAllocator(ReadOnlyMemory<T> memory)
             : this(memory.ToArray())
@@ -202,30 +234,39 @@ namespace Unknown6656.BigFuckingAllocator
 
         /// <summary>
         /// Creates a new (non-destructive) allocator for the given array.
+        /// <br/>
+        /// All items will be copied from the array into the newly created allocator.
         /// </summary>
         /// <param name="collection">Array of items.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BigFuckingAllocator(params T[] array)
             : this((ulong)array.LongLength) => Parallel.For(0, array.LongLength, i => *this[(ulong)i] = array[i]);
 
+        /// <summary>
+        /// Creates a new (non-destructive) allocator from the given pointer with the given element count.
+        /// <br/>
+        /// All items will be copied from the pointer into the newly created allocator.
+        /// </summary>
+        /// <param name="pointer">Pointer.</param>
+        /// <param name="element_count">Element count.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BigFuckingAllocator(T* pointer, ulong count)
-            : this(count) => Parallel.For(0, (long)count, i => *this[(ulong)i] = pointer[i]);
+        public BigFuckingAllocator(T* pointer, ulong element_count)
+            : this(element_count) => Parallel.For(0, (long)element_count, i => *this[(ulong)i] = pointer[i]);
 
+        /// <summary>
+        /// Creates a new allocator with the given capacity and allocates all the required memory.
+        /// </summary>
+        /// <param name="element_count">Number of elements which the allocator will (later) hold.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public BigFuckingAllocator(ulong item_count)
+        public BigFuckingAllocator(ulong element_count)
         {
-            ItemCount = item_count;
+            ItemCount = element_count;
             _slicesize = IBigFuckingAllocator.MaximumSliceSize / ElementSize;
-            _slicecount = (int)Math.Ceiling((double)item_count / _slicesize);
+            _slicecount = (int)Math.Ceiling((double)element_count / _slicesize);
             _slices = new T*[_slicecount];
 
             for (int slice_index = 0; slice_index < _slicecount; ++slice_index)
-            {
-                int count = slice_index < _slicecount - 1 ? _slicesize : (int)(item_count - (ulong)(slice_index * _slicesize));
-
-                _slices[slice_index] = (T*)Marshal.AllocHGlobal(count * ElementSize);
-            }
+                _slices[slice_index] = (T*)Marshal.AllocHGlobal(GetBinarySliceSize(slice_index));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -268,14 +309,10 @@ namespace Unknown6656.BigFuckingAllocator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void MemorySet(T value)
         {
-            for (int i = 0; i < _slicecount; ++i)
-            {
-                T* ptr = _slices[i];
-                byte* bptr = (byte*)ptr;
-                int length = i < _slices.Length - 1 ? _slicesize : (int)(ItemCount - (ulong)i * (ulong)_slicesize);
+            int slice_index = 0;
 
-                Parallel.For(0, length, j => ptr[j] = value);
-            }
+            foreach (T* slice in _slices)
+                Parallel.For(0, GetSliceSize(slice_index++), j => slice[j] = value);
         }
 
         /// <summary>
@@ -359,6 +396,10 @@ namespace Unknown6656.BigFuckingAllocator
         /// <returns>Slice pointer.</returns>
         public T* UnsafeGetSliceBasePointer(ulong element_index) => UnsafeGetSliceBasePointer(GetSliceIndex(element_index));
 
+        /// <summary>
+        /// Returns an enumerator which enumerates all allocated elements.
+        /// </summary>
+        /// <returns>Generic enumerator.</returns>
         public IEnumerable<T> AsIEnumerable()
         {
             // copy local fields to prevent future binding
@@ -376,77 +417,157 @@ namespace Unknown6656.BigFuckingAllocator
             return iterator(i => sl[i / sz][i % sz]);
         }
 
+        /// <summary>
+        /// Copies all allocated elements into an array and returns it.
+        /// <br/>
+        /// The array will have a length of <see cref="ItemCount"/> items.
+        /// </summary>
+        /// <returns>The array.</returns>
         public T[] ToArray()
         {
+            T[] array = new T[ItemCount];
+            ulong prev_offset = 0;
+
+            for (int slice_index = 0; slice_index < _slicecount; ++slice_index)
+            {
+                T* ptr = _slices[slice_index];
+                int size = GetSliceSize(slice_index);
+
+                Parallel.For(0, size, i => array[prev_offset + (ulong)i] = ptr[i]);
+
+                prev_offset += (ulong)size;
+            }
+
+            return array;
         }
 
-        public Span<T> ToSpan()
-        {
-        }
+        /// <summary>
+        /// Copies all allocated elements into a memory span and returns it.
+        /// <br/>
+        /// The span will have a length of <see cref="ItemCount"/> items.
+        /// </summary>
+        /// <returns>The memory span.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Span<T> ToSpan() => ToArray();
 
-        public ReadOnlySpan<T> ToReadonlySpan()
-        {
-        }
+        /// <summary>
+        /// Copies all allocated elements into a read-only memory span and returns it.
+        /// <br/>
+        /// The span will have a length of <see cref="ItemCount"/> items.
+        /// </summary>
+        /// <returns>The read-only memory span.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> ToReadonlySpan() => ToArray();
 
-        public Memory<T> ToMemory()
-        {
-        }
+        /// <summary>
+        /// Copies all allocated elements into a memory region and returns it.
+        /// <br/>
+        /// The region will have a length of <see cref="ItemCount"/> items.
+        /// </summary>
+        /// <returns>The memory region.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> ToMemory() => ToArray();
 
-        public ReadOnlyMemory<T> ToReadonlyMemory()
-        {
-        }
+        /// <summary>
+        /// Copies all allocated elements into a read-only memory region and returns it.
+        /// <br/>
+        /// The region will have a length of <see cref="ItemCount"/> items.
+        /// </summary>
+        /// <returns>The read-only memory region.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlyMemory<T> ToReadonlyMemory() => ToArray();
+
+        /// <inheritdoc cref="BigFuckingAllocator{T}.BigFuckingAllocator(ulong)"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BigFuckingAllocator<T> Allocate(ulong item_count) => new(item_count);
 
 
         // TODO : merge multiple allocators
-        // TODO : cast allocator (?)
+        // TODO : create allocator from existing array
+        // TODO : overlaps method
 
 
+        /// <inheritdoc cref="BigFuckingAllocator{T}.BigFuckingAllocator(T[])"/>
         public static implicit operator BigFuckingAllocator<T>(T[] array) => new(array);
 
+        /// <inheritdoc cref="BigFuckingAllocator{T}.BigFuckingAllocator(Span{T})"/>
         public static implicit operator BigFuckingAllocator<T>(Span<T> span) => new(span);
 
+        /// <inheritdoc cref="BigFuckingAllocator{T}.BigFuckingAllocator(ReadOnlySpan{T})"/>
         public static implicit operator BigFuckingAllocator<T>(ReadOnlySpan<T> span) => new(span);
 
+        /// <inheritdoc cref="BigFuckingAllocator{T}.BigFuckingAllocator(Memory{T})"/>
         public static implicit operator BigFuckingAllocator<T>(Memory<T> memory) => new(memory.Span);
 
+        /// <inheritdoc cref="BigFuckingAllocator{T}.BigFuckingAllocator(ReadOnlyMemory{T})"/>
         public static implicit operator BigFuckingAllocator<T>(ReadOnlyMemory<T> memory) => new(memory.Span);
 
-
+        /// <inheritdoc cref="ToArray"/>
         public static explicit operator T[](BigFuckingAllocator<T> allocator) => allocator.ToArray();
 
+        /// <inheritdoc cref="ToSpan"/>
         public static explicit operator Span<T>(BigFuckingAllocator<T> allocator) => allocator.ToSpan();
 
+        /// <inheritdoc cref="ToReadonlySpan"/>
         public static explicit operator ReadOnlySpan<T>(BigFuckingAllocator<T> allocator) => allocator.ToReadonlySpan();
 
+        /// <inheritdoc cref="ToMemory"/>
         public static explicit operator Memory<T>(BigFuckingAllocator<T> allocator) => allocator.ToMemory();
 
+        /// <inheritdoc cref="ToReadonlyMemory"/>
         public static explicit operator ReadOnlyMemory<T>(BigFuckingAllocator<T> allocator) => allocator.ToReadonlyMemory();
     }
 
+    /// <summary>
+    /// Represents a memory allocator for the type <see cref="byte"/> which uses a set of non-continuous memory slices.
+    /// </summary>
     public unsafe class BigFuckingAllocator
         : BigFuckingAllocator<byte>
     {
+        /// <inheritdoc/>
         public BigFuckingAllocator(IEnumerable<byte> collection)
             : base(collection)
         {
         }
 
+        /// <inheritdoc/>
         public BigFuckingAllocator(params byte[] array)
             : base(array)
         {
         }
 
+        /// <inheritdoc/>
         public BigFuckingAllocator(Span<byte> memory)
             : base(memory)
         {
         }
 
+        /// <inheritdoc/>
+        public BigFuckingAllocator(ReadOnlySpan<byte> memory)
+            : base(memory)
+        {
+        }
+
+        /// <inheritdoc/>
+        public BigFuckingAllocator(Memory<byte> memory)
+            : base(memory)
+        {
+        }
+
+        /// <inheritdoc/>
+        public BigFuckingAllocator(ReadOnlyMemory<byte> memory)
+            : base(memory)
+        {
+        }
+
+        /// <inheritdoc/>
         public BigFuckingAllocator(ulong item_count)
             : base(item_count)
         {
         }
 
-        public BigFuckingAllocator(void* pointer, long count)
+        /// <inheritdoc/>
+        public BigFuckingAllocator(void* pointer, ulong count)
             : base((byte*)pointer, count)
         {
         }
