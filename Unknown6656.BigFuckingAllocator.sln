@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unknown6656.BigFuckingAlloc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{89B433B7-2DC7-409E-8107-7DB9934F1F55}"
 	ProjectSection(SolutionItems) = preProject
+		publish.bat = publish.bat
+		publish.ps1 = publish.ps1
 		version.txt = version.txt
 	EndProjectSection
 EndProject
