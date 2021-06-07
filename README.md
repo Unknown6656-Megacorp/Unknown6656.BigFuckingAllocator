@@ -4,3 +4,7 @@
 # Unknown6656.BigFuckingAllocator
 A C# memory allocator for big-ass memory regions
 
+
+Download:
+- https://www.nuget.org/packages/Unknown6656.BigFuckingAllocator/
+- https://github.com/Unknown6656-Megacorp/Unknown6656.BigFuckingAllocator/releases
