@@ -5,6 +5,11 @@ VisualStudioVersion = 16.0.31313.381
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unknown6656.BigFuckingAllocator", "Unknown6656.BigFuckingAllocator\Unknown6656.BigFuckingAllocator.csproj", "{AB684CC0-C145-4426-96F6-8FDC2C33F284}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{89B433B7-2DC7-409E-8107-7DB9934F1F55}"
+	ProjectSection(SolutionItems) = preProject
+		version.txt = version.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
