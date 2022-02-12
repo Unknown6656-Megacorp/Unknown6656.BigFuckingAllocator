@@ -7,7 +7,7 @@
         <NullableContextOptions>enable</NullableContextOptions>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <OutputPath>$(SolutionDir)bin</OutputPath>
+        <OutputPath>$(SolutionDir)bin/dotnet</OutputPath>
 
         <!-- <TrimMode>Link</TrimMode> -->
         <Deterministic>true</Deterministic>
@@ -37,6 +37,8 @@
         <Version>$([System.IO.File]::ReadAllText("$(SolutionDir)version.txt"))</Version>
         <PackageVersion>$([System.IO.File]::ReadAllText("$(SolutionDir)version.txt"))</PackageVersion>
         <AssemblyVersion>$([System.IO.File]::ReadAllText("$(SolutionDir)version.txt"))</AssemblyVersion>
+        <AssemblyName>unknown6656.bigfuckingallocator-dotnet</AssemblyName>
+        <RootNamespace>Unknown6656.BigFuckingAllocator</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
         <None Include="C:/Users/unknown6656/Pictures/unknown6656/unknown6656-logo-1024.png">
