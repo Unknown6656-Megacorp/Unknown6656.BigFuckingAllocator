@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+
+
+struct __empty { };
 
 namespace Unknown6656.BigFuckingAllocator
 {
@@ -18,6 +23,14 @@ namespace Unknown6656.BigFuckingAllocator
         /// The default maximum size are 256 MB.
         /// </summary>
         public const int MaximumSliceSize = 256 * 1024 * 1024;
+
+        internal static readonly ConcurrentDictionary<IBigFuckingAllocator, __empty> _instances = new();
+
+        /// <summary>
+        /// A collection of all current allocator instances.
+        /// </summary>
+        public static ReadOnlyCollection<IBigFuckingAllocator> Instances => new(_instances.Keys.ToList());
+
 
         /// <summary>
         /// Returns the binary size of a single element (of type <see cref="T"/>).
@@ -260,6 +273,8 @@ namespace Unknown6656.BigFuckingAllocator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BigFuckingAllocator(ulong element_count)
         {
+            IBigFuckingAllocator._instances[this] = default;
+
             ItemCount = element_count;
             _slicesize = IBigFuckingAllocator.MaximumSliceSize / ElementSize;
             _slicecount = (int)Math.Ceiling((double)element_count / _slicesize);
@@ -281,6 +296,8 @@ namespace Unknown6656.BigFuckingAllocator
         {
             if (!IsDisposed)
             {
+                IBigFuckingAllocator._instances.TryRemove(this, out _);
+
                 if (managed_call)
                     ; // TODO : managed disposals
 
