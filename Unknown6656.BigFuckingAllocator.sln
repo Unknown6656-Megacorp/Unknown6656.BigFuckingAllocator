@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31313.381
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unknown6656.BigFuckingAllocator", "Unknown6656.BigFuckingAllocator\Unknown6656.BigFuckingAllocator.csproj", "{AB684CC0-C145-4426-96F6-8FDC2C33F284}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet", "dotnet\dotnet.csproj", "{AB684CC0-C145-4426-96F6-8FDC2C33F284}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{89B433B7-2DC7-409E-8107-7DB9934F1F55}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,16 +12,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.txt = version.txt
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp", "cpp\cpp.vcxproj", "{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Debug|x64.Build.0 = Debug|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Debug|x86.Build.0 = Debug|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Release|x64.ActiveCfg = Release|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Release|x64.Build.0 = Release|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Release|x86.ActiveCfg = Release|Any CPU
+		{AB684CC0-C145-4426-96F6-8FDC2C33F284}.Release|x86.Build.0 = Release|Any CPU
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Debug|x64.ActiveCfg = Debug|x64
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Debug|x64.Build.0 = Debug|x64
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Debug|x86.ActiveCfg = Debug|Win32
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Debug|x86.Build.0 = Debug|Win32
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Release|x64.ActiveCfg = Release|x64
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Release|x64.Build.0 = Release|x64
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Release|x86.ActiveCfg = Release|Win32
+		{48660E5A-AE7C-4E0C-B01B-55E67B75DF90}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
